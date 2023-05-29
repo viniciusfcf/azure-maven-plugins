@@ -34,6 +34,8 @@ public class ConfigParser {
                 .disableAppInsights(mojo.isDisableAppInsights())
                 .appInsightsKey(mojo.getAppInsightsKey())
                 .appInsightsInstance(mojo.getAppInsightsInstance())
+                .nativeExecutablePath(mojo.getNativeExecutablePath())
+                .customHandlerArgs(mojo.getCustomHandlerArgs())
                 .subscriptionId(mojo.getSubscriptionId())
                 .resourceGroup(mojo.getResourceGroup())
                 .appName(mojo.getAppName())

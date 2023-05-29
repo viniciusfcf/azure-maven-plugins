@@ -16,5 +16,7 @@ public class FunctionAppConfig extends AppServiceConfig {
     private String appInsightsInstance;
     private String appInsightsKey;
     private boolean disableAppInsights;
+    private String nativeExecutablePath;
+    private String customHandlerArgs;
     private LogAnalyticsWorkspaceConfig workspaceConfig;
 }
