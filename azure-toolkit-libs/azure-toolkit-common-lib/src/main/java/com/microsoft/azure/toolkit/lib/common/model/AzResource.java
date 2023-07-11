@@ -65,7 +65,7 @@ public interface AzResource extends Refreshable {
     default Subscription getSubscription() {
         try {
             return Azure.az(IAzureAccount.class).account().getSubscription(this.getSubscriptionId());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return new Subscription(this.getSubscriptionId());
         }
     }
@@ -73,34 +73,15 @@ public interface AzResource extends Refreshable {
     @Nonnull
     default String getPortalUrl() {
         final IAccount account = Azure.az(IAzureAccount.class).account();
-        Subscription subscription = account.getSubscription(this.getSubscriptionId());
+        final Subscription subscription = account.getSubscription(this.getSubscriptionId());
         return String.format("%s/#@%s/resource%s", account.getPortalUrl(), subscription.getTenantId(), this.getId());
     }
 
     @Nonnull
-    default String getStatus() {
-        return getStatus(false);
-    }
-
-    /**
-     * @param immediately true to get status immediately from cache and refresh
-     *                    status asynchronously if needed;
-     *                    false to wait for status refresh synchronously if needed.
-     */
-    @Nonnull
-    String getStatus(boolean immediately);
+    String getStatus();
 
     default FormalStatus getFormalStatus() {
-        return getFormalStatus(false);
-    }
-
-    /**
-     * @param immediately true to get status immediately from cache and refresh
-     *                    status asynchronously if needed;
-     *                    false to wait for status refresh synchronously if needed.
-     */
-    default FormalStatus getFormalStatus(boolean immediately) {
-        final String status = this.getStatus(immediately);
+        final String status = this.getStatus();
         return StringUtils.isBlank(status) ? FormalStatus.UNKNOWN : FormalStatus.dummyFormalize(status);
     }
 
@@ -108,11 +89,11 @@ public interface AzResource extends Refreshable {
     enum FormalStatus {
         RUNNING, STOPPED, FAILED, DELETED, UNKNOWN, WRITING, READING, CREATING, DELETING;
 
-        private static final HashSet<String> runningStatus = Sets.newHashSet("running", "success", "succeeded", "ready", "ok", "healthy", "active");
+        private static final HashSet<String> runningStatus = Sets.newHashSet("running", "success", "succeeded", "ready", "ok", "online", "healthy", "active");
         private static final HashSet<String> stoppedStatus = Sets.newHashSet("stopped", "deallocated", "deprovisioned", "disabled");
         private static final HashSet<String> failedStatus = Sets.newHashSet("failed", "error", "unhealthy");
         private static final HashSet<String> writingStatus = Sets.newHashSet("writing", "pending", "processing", "updating",
-            "starting", "stopping", "activating", "deactivating", "restarting", "scaling", "deprovisioning", "provisioning");
+            "starting", "stopping", "activating", "deactivating", "restarting", "scaling", "deprovisioning", "provisioning", "deploying");
         private static final HashSet<String> readingStatus = Sets.newHashSet("reading", "loading", "refreshing");
         private static final HashSet<String> deletingStatus = Sets.newHashSet("deleting");
         private static final HashSet<String> deletedStatus = Sets.newHashSet("deleted", "removed", "disconnected");
@@ -125,7 +106,7 @@ public interface AzResource extends Refreshable {
                 return FormalStatus.STOPPED;
             } else if (failedStatus.contains(status)) {
                 return FormalStatus.FAILED;
-            } else if (status.equals("creating")) {
+            } else if ("creating".equals(status)) {
                 return FormalStatus.CREATING;
             } else if (writingStatus.contains(status)) {
                 return FormalStatus.WRITING;
@@ -240,14 +221,14 @@ public interface AzResource extends Refreshable {
 
         @Nonnull
         @Override
-        public String loadStatus(@Nonnull Void remote) {
-            return Status.UNKNOWN;
+        protected String loadStatus(@Nonnull Void remote) {
+            return Status.OK;
         }
 
         @Nonnull
         @Override
-        public String getStatus(boolean immediately) {
-            return Status.UNKNOWN;
+        public String getStatus() {
+            return Status.OK;
         }
 
         @Override
@@ -346,6 +327,8 @@ public interface AzResource extends Refreshable {
         String ERROR = "Error";
         String INACTIVE = "Inactive"; // no active deployment/...
         String RUNNING = "Running";
+        String OK = "OK";
+        String ONLINE = "Online";
         String STOPPED = "Stopped";
         String UNKNOWN = "Unknown";
     }

@@ -35,8 +35,8 @@ public class MicrosoftSqlDatabase extends AbstractAzResource<MicrosoftSqlDatabas
 
     @Nonnull
     @Override
-    public String loadStatus(@Nonnull SqlDatabase remote) {
-        return Status.UNKNOWN;
+    protected String loadStatus(@Nonnull SqlDatabase remote) {
+        return Status.ONLINE;
     }
 
     @Nonnull

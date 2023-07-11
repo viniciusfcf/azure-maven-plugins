@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class CosmosDBAccount extends AbstractAzResource<CosmosDBAccount, CosmosServiceSubscription,
@@ -44,12 +43,12 @@ public class CosmosDBAccount extends AbstractAzResource<CosmosDBAccount, CosmosS
 
     @Nonnull
     public DatabaseAccountKeys listKeys() {
-        return remoteOptional(true).map(ignore -> this.databaseAccountKeys).orElseGet(DatabaseAccountKeys::new);
+        return remoteOptional().map(ignore -> this.databaseAccountKeys).orElseGet(DatabaseAccountKeys::new);
     }
 
     @Nonnull
     public DatabaseAccountConnectionStrings listConnectionStrings() {
-        return remoteOptional(true).map(ignore -> this.databaseAccountConnectionStrings).orElseGet(DatabaseAccountConnectionStrings::new);
+        return remoteOptional().map(ignore -> this.databaseAccountConnectionStrings).orElseGet(DatabaseAccountConnectionStrings::new);
     }
 
     @Nullable
@@ -65,7 +64,7 @@ public class CosmosDBAccount extends AbstractAzResource<CosmosDBAccount, CosmosS
 
     @Nullable
     public String getDocumentEndpoint() {
-        return Optional.ofNullable(getRemote()).map(remote -> remote.documentEndpoint()).orElse(null);
+        return Optional.ofNullable(getRemote()).map(com.azure.resourcemanager.cosmos.models.CosmosDBAccount::documentEndpoint).orElse(null);
     }
 
     @Nullable
@@ -80,7 +79,7 @@ public class CosmosDBAccount extends AbstractAzResource<CosmosDBAccount, CosmosS
 
     @Nonnull
     @Override
-    public String loadStatus(@Nonnull com.azure.resourcemanager.cosmos.models.CosmosDBAccount remote) {
+    protected String loadStatus(@Nonnull com.azure.resourcemanager.cosmos.models.CosmosDBAccount remote) {
         // todo: investigate how to get status instead of provisioning state
         return remote.innerModel().provisioningState();
     }
@@ -92,7 +91,8 @@ public class CosmosDBAccount extends AbstractAzResource<CosmosDBAccount, CosmosS
             this.databaseAccountConnectionStrings = null;
         } else {
             this.databaseAccountKeys = DatabaseAccountKeys.fromDatabaseAccountListKeysResult(newRemote.listKeys());
-            this.databaseAccountConnectionStrings = DatabaseAccountConnectionStrings.fromDatabaseAccountListConnectionStringsResult(newRemote.listConnectionStrings(), Objects.requireNonNull(this.getKind()));
+            final DatabaseAccountKind kind = DatabaseAccountKind.fromAccount(newRemote);
+            this.databaseAccountConnectionStrings = DatabaseAccountConnectionStrings.fromDatabaseAccountListConnectionStringsResult(newRemote.listConnectionStrings(), kind);
         }
     }
 }

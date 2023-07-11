@@ -26,12 +26,6 @@ public class MySqlDatabase extends AbstractAzResource<MySqlDatabase, MySqlServer
         super(remote.name(), module);
     }
 
-    @Nullable
-    @Override
-    protected Database refreshRemoteFromAzure(@Nonnull Database remote) {
-        return remote.refresh();
-    }
-
     @Nonnull
     @Override
     public List<AbstractAzResourceModule<?, ?, ?>> getSubModules() {
@@ -40,8 +34,8 @@ public class MySqlDatabase extends AbstractAzResource<MySqlDatabase, MySqlServer
 
     @Nonnull
     @Override
-    public String loadStatus(@Nonnull Database remote) {
-        return Status.UNKNOWN;
+    protected String loadStatus(@Nonnull Database remote) {
+        return Status.ONLINE;
     }
 
     @Nullable
